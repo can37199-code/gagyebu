@@ -190,8 +190,8 @@ textarea.field{min-height:110px;resize:vertical;font-family:var(--mono);font-siz
   </div>
 
   <main>
-    <section id="v-home"></section>
-    <section id="v-stats" hidden></section>
+    <section id="v-home" hidden></section>
+    <section id="v-stats"></section>
     <section id="v-set" class="set" hidden>
       <div class="card">
         <h2>카테고리</h2>
@@ -240,8 +240,8 @@ textarea.field{min-height:110px;resize:vertical;font-family:var(--mono);font-siz
 
 <nav class="tabs" aria-label="메뉴">
   <div>
-    <button data-view="home" aria-current="page"><span>🏠</span>내역</button>
-    <button data-view="stats"><span>📊</span>통계</button>
+    <button data-view="stats" aria-current="page"><span>📊</span>통계</button>
+    <button data-view="home"><span>🏠</span>내역</button>
     <button data-view="set"><span>⚙️</span>설정</button>
   </div>
 </nav>
@@ -328,7 +328,7 @@ const hasSample=()=>db.tx.some(t=>t.sample);
 
 /* state */
 const now=new Date();
-const S={view:'home',y:now.getFullYear(),m:now.getMonth(),ctype:'out',edit:null,ftype:'out',fcat:null};
+const S={view:'stats',y:now.getFullYear(),m:now.getMonth(),ctype:'out',edit:null,ftype:'out',fcat:null};
 const mkey=(y,m)=>y+'-'+pad(m+1);
 function cat(type,id){return db.cats[type].find(c=>c.id===id)||{id,name:'삭제된 카테고리',icon:'📦'};}
 function catColor(id){const i=db.cats.out.findIndex(c=>c.id===id);return PALETTE[(i<0?7:i)%PALETTE.length];}
