@@ -119,8 +119,10 @@ button{cursor:pointer}
 .bar{grid-area:bar;height:.45rem;border-radius:.25rem;background:var(--sunk);overflow:hidden}
 .bar i{display:block;height:100%;border-radius:.25rem}
 .delta{grid-area:d;font-size:.85rem;color:var(--muted);white-space:normal}
+.rk.nod{grid-template-areas:"ico n v" "ico bar bar"}
 @container (max-width: 19em){
   .rk{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"ico n" "ico v" "bar bar" "d d"}
+  .rk.nod{grid-template-areas:"ico n" "ico v" "bar bar"}
   .rk .v{text-align:left}
 }
 
@@ -185,6 +187,12 @@ textarea.field{min-height:7rem;resize:vertical;font-family:var(--mono);font-size
 .cats button span{font-size:1.45rem;line-height:1.2}
 .cats button em{font-style:normal;max-width:100%;padding:0 .15rem;text-align:center;line-height:1.25}
 .cats button[aria-pressed="true"]{border-color:var(--accent);background:var(--surface);font-weight:700}
+.q-lbl{font-size:.95rem;font-weight:700;margin-bottom:.45rem}
+.pay-box{display:grid;gap:.5rem}
+.no-card{font-size:.9rem;color:var(--muted);background:var(--sunk);border-radius:.8rem;padding:.7rem .8rem}
+.addcard{display:flex;flex-wrap:wrap;gap:.5rem}
+.addcard .field{flex:1 1 10rem}
+.addcard .btn{flex:1 0 auto}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.5rem}
 .lbl{font-size:.85rem;color:var(--muted);margin-bottom:.25rem;display:block}
 .err{color:var(--danger);font-size:.95rem;font-weight:600}
@@ -244,6 +252,16 @@ try{var s=localStorage.getItem('hanson-gagyebu-scale');if(s)document.documentEle
           <input class="field" id="newIcon" maxlength="4" placeholder="🙂" aria-label="아이콘(이모지)" style="text-align:center">
           <input class="field" id="newName" maxlength="10" placeholder="새 카테고리 이름" aria-label="카테고리 이름">
           <button class="btn primary" type="submit">카테고리 추가</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>내 카드</h2>
+        <p>지출을 적을 때 고르는 카드 목록이에요. 안 쓰는 카드는 지우고, 없는 카드는 추가하세요.</p>
+        <div class="chips" id="cardChips"></div>
+        <form class="addcard" id="addCard">
+          <input class="field" id="newCard" maxlength="12" placeholder="예: 카카오뱅크카드" aria-label="카드 이름">
+          <button class="btn primary" type="submit">카드 추가</button>
         </form>
       </div>
 
@@ -309,7 +327,18 @@ try{var s=localStorage.getItem('hanson-gagyebu-scale');if(s)document.documentEle
       <button type="button" data-add="50000">+5만</button>
       <button type="button" data-add="0">지우기</button>
     </div>
-    <div class="cats" id="fCats" role="group" aria-label="카테고리"></div>
+    <div>
+      <div class="q-lbl" id="catLbl">어디에 썼어요?</div>
+      <div class="cats" id="fCats" role="group" aria-label="카테고리"></div>
+    </div>
+    <div class="pay-box" id="paySec">
+      <div class="q-lbl" style="margin:0">어떻게 냈어요?</div>
+      <div class="seg" id="paySeg">
+        <button type="button" data-pay="cash" aria-pressed="false">💵 현금</button>
+        <button type="button" data-pay="card" aria-pressed="false">💳 카드</button>
+      </div>
+      <div class="cats" id="fCards" role="group" aria-label="카드사" hidden></div>
+    </div>
     <div class="two">
       <label><span class="lbl">날짜</span><input type="date" class="field" id="fDate"></label>
       <label><span class="lbl">메모 (안 써도 돼요)</span><input class="field" id="fMemo" maxlength="40" placeholder="예: 점심 김밥"></label>
@@ -334,6 +363,7 @@ const DEF_CATS={
   out:[['food','식비','🍚'],['cafe','카페','☕'],['trans','교통','🚌'],['shop','쇼핑','🛒'],['home','주거/통신','🏠'],['med','의료','💊'],['fun','여가','🎉'],['etc','기타','📦']],
   in:[['salary','급여','💰'],['allow','용돈','💵'],['ietc','기타','📦']]
 };
+const DEF_CARDS=[['shinhan','신한카드'],['samsung','삼성카드'],['hyundai','현대카드'],['kb','KB국민카드'],['lotte','롯데카드'],['hana','하나카드'],['woori','우리카드'],['bc','BC카드'],['nh','NH농협카드']];
 const WD=['일','월','화','수','목','금','토'];
 const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(2,'0');
@@ -343,6 +373,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 
 function defCats(){const o={};for(const t in DEF_CATS)o[t]=DEF_CATS[t].map(([id,name,icon])=>({id,name,icon}));return o;}
+function defCards(){return DEF_CARDS.map(([id,name])=>({id,name}));}
 
 function sampleTx(){
   const now=new Date(),y=now.getFullYear(),m=now.getMonth(),today=now.getDate();
@@ -351,13 +382,17 @@ function sampleTx(){
   const out=[];
   cur.forEach(([ago,type,amt,cat,memo])=>{out.push({id:uid(),type,amt,cat,memo,date:iso(new Date(y,m,Math.max(1,today-ago))),sample:true});});
   prev.forEach(([d,type,amt,cat,memo])=>{const last=new Date(y,m,0).getDate();out.push({id:uid(),type,amt,cat,memo,date:iso(new Date(y,m-1,Math.min(d,last))),sample:true});});
+  const PAYS=[['card','shinhan'],['cash'],['card','samsung'],['card','shinhan'],['cash']];
+  out.filter(t=>t.type==='out').forEach((t,i)=>{const p=PAYS[i%PAYS.length];t.pay=p[0];if(p[1])t.card=p[1];});
   return out;
 }
 
 let db, storageOk=true;
-function fresh(withSample){return {v:1,cats:defCats(),tx:withSample?sampleTx():[]};}
+function fresh(withSample){return {v:2,cats:defCats(),cards:defCards(),tx:withSample?sampleTx():[]};}
+/* 예전 데이터(카드 목록 없음)도 그대로 쓸 수 있게 채워 준다 */
+function upgrade(d){if(!Array.isArray(d.cards))d.cards=defCards();d.v=2;return d;}
 function load(){
-  try{const s=localStorage.getItem(KEY);if(s){const d=JSON.parse(s);if(d&&Array.isArray(d.tx)&&d.cats){db=d;return;}}}catch(e){storageOk=false;}
+  try{const s=localStorage.getItem(KEY);if(s){const d=JSON.parse(s);if(d&&Array.isArray(d.tx)&&d.cats){db=upgrade(d);return;}}}catch(e){storageOk=false;}
   db=fresh(true);
 }
 function save(){
@@ -380,9 +415,14 @@ function renderSizes(){
 
 /* state */
 const now=new Date();
-const S={view:'stats',y:now.getFullYear(),m:now.getMonth(),ctype:'out',edit:null,ftype:'out',fcat:null};
+const S={view:'stats',y:now.getFullYear(),m:now.getMonth(),ctype:'out',edit:null,ftype:'out',fcat:null,fpay:null,fcard:null};
 const mkey=(y,m)=>y+'-'+pad(m+1);
 function cat(type,id){return db.cats[type].find(c=>c.id===id)||{id,name:'삭제된 카테고리',icon:'📦'};}
+function cardName(id){const c=db.cards.find(x=>x.id===id);return c?c.name:'삭제된 카드';}
+function payText(t){
+  if(t.type!=='out'||!t.pay)return '';
+  return t.pay==='cash'?'💵 현금':'💳 '+(t.card?cardName(t.card):'카드');
+}
 function catColor(id){const i=db.cats.out.findIndex(c=>c.id===id);return PALETTE[(i<0?7:i)%PALETTE.length];}
 function monthTx(y,m){const k=mkey(y,m);return db.tx.filter(t=>t.date.slice(0,7)===k);}
 
@@ -426,8 +466,8 @@ function renderHome(){
     let net=0;items.forEach(t=>net+=t.type==='in'?t.amt:-t.amt);
     h+=`<div class="day"><div class="day-h"><span>${mm}월 ${dd}일 (${WD[new Date(yy,mm-1,dd).getDay()]})</span><span class="num">${net<0?'−':'+'}${won(Math.abs(net))}원</span></div><div class="rows">`;
     items.slice().reverse().forEach(t=>{
-      const c=cat(t.type,t.cat);
-      h+=`<button class="row" data-edit="${t.id}"><span class="ico">${esc(c.icon)}</span><span class="t"><b>${esc(c.name)}</b>${t.memo?`<span>${esc(t.memo)}</span>`:''}</span><span class="amt num ${t.type==='in'?'c-in':'c-out'}">${t.type==='in'?'+':'−'}${won(t.amt)}원</span></button>`;
+      const c=cat(t.type,t.cat),sub=[payText(t),t.memo].filter(Boolean).join(' · ');
+      h+=`<button class="row" data-edit="${t.id}"><span class="ico">${esc(c.icon)}</span><span class="t"><b>${esc(c.name)}</b>${sub?`<span>${esc(sub)}</span>`:''}</span><span class="amt num ${t.type==='in'?'c-in':'c-out'}">${t.type==='in'?'+':'−'}${won(t.amt)}원</span></button>`;
     });
     h+=`</div></div>`;
   });
@@ -462,6 +502,17 @@ function renderStats(){
       <span class="delta">${dl}</span></div>`;
   });
   h+=`</div></div>`;
+  /* 결제 수단별 */
+  const pays={};
+  cur.forEach(t=>{if(t.type!=='out')return;const k=t.pay==='cash'?'cash':t.pay==='card'?'card:'+(t.card||''):'none';pays[k]=(pays[k]||0)+t.amt;});
+  const prow=Object.entries(pays).sort((x,y)=>y[1]-x[1]);
+  h+=`<div class="card"><h2>어떻게 냈을까요</h2><div class="rank">`;
+  prow.forEach(([k,v])=>{
+    const [ico,name,color]=k==='cash'?['💵','현금','#4ea56c']:k==='none'?['❔','결제 수단 안 적음','#8d989c']:['💳',k.slice(5)?cardName(k.slice(5)):'카드','#3b8ed3'];
+    h+=`<div class="rk nod"><span class="ico">${ico}</span><span class="n">${esc(name)}<small>${Math.round(v/total*100)}%</small></span><span class="v num">${won(v)}원</span>
+      <div class="bar"><i style="width:${Math.max(2,v/prow[0][1]*100)}%;background:${color}"></i></div></div>`;
+  });
+  h+=`</div></div>`;
   $('v-stats').innerHTML=h;
 }
 
@@ -469,17 +520,33 @@ function renderSet(){
   renderSizes();
   document.querySelectorAll('#catSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ctype===S.ctype));
   $('chips').innerHTML=db.cats[S.ctype].map(c=>`<span class="chip">${esc(c.icon)} ${esc(c.name)}<button type="button" data-delcat="${esc(c.id)}" aria-label="${esc(c.name)} 삭제">✕</button></span>`).join('');
+  $('cardChips').innerHTML=db.cards.length?db.cards.map(c=>`<span class="chip">💳 ${esc(c.name)}<button type="button" data-delcard="${esc(c.id)}" aria-label="${esc(c.name)} 삭제">✕</button></span>`).join(''):'<span class="no-card">등록된 카드가 없어요. 아래에서 추가하세요.</span>';
 }
 
 /* sheet */
 function renderCats(){
   $('fCats').innerHTML=db.cats[S.ftype].map(c=>`<button type="button" data-cat="${esc(c.id)}" aria-pressed="${c.id===S.fcat}"><span>${esc(c.icon)}</span><em>${esc(c.name)}</em></button>`).join('');
   document.querySelectorAll('#typeSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.type===S.ftype));
+  $('catLbl').textContent=S.ftype==='out'?'어디에 썼어요?':'어디서 받았어요?';
+  renderPay();
+}
+function renderPay(){
+  $('paySec').hidden=S.ftype!=='out';
+  document.querySelectorAll('#paySeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.pay===S.fpay));
+  const box=$('fCards');box.hidden=S.fpay!=='card';
+  box.innerHTML=db.cards.length
+    ?db.cards.map(c=>`<button type="button" data-card="${esc(c.id)}" aria-pressed="${c.id===S.fcard}"><span>💳</span><em>${esc(c.name)}</em></button>`).join('')
+    :'<div class="no-card" style="grid-column:1/-1">등록된 카드가 없어요. 설정 → 내 카드에서 추가하세요.</div>';
 }
 function setAmt(n){$('fAmt').value=n?won(n):'';}
 function getAmt(){return Number($('fAmt').value.replace(/[^\d]/g,''))||0;}
 function openSheet(tx){
   S.edit=tx?tx.id:null;S.ftype=tx?tx.type:'out';S.fcat=tx?tx.cat:null;
+  /* 새 기록은 지난번에 쓴 결제 수단을 미리 골라 둔다 */
+  const last=db.last||{};
+  S.fpay=tx?(tx.pay||null):(last.pay||null);
+  S.fcard=tx?(tx.card||null):(last.card||null);
+  if(S.fcard&&!db.cards.some(c=>c.id===S.fcard)&&!(tx&&tx.card===S.fcard))S.fcard=null;
   $('sheetTitle').textContent=tx?'기록 고치기':'기록 추가';
   setAmt(tx?tx.amt:0);$('fDate').value=tx?tx.date:iso(new Date());$('fMemo').value=tx?tx.memo||'':'';
   $('delBtn').hidden=!tx;$('delBtn').textContent='삭제';$('delBtn').classList.remove('arm');delete $('delBtn').dataset.armed;
@@ -506,6 +573,8 @@ $('closeSheet').addEventListener('click',e=>{e.preventDefault();e.stopPropagatio
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('sheetWrap').hidden)closeSheet();});
 $('typeSeg').addEventListener('click',e=>{const b=e.target.closest('[data-type]');if(!b||b.dataset.type===S.ftype)return;S.ftype=b.dataset.type;S.fcat=null;renderCats();});
 $('fCats').addEventListener('click',e=>{const b=e.target.closest('[data-cat]');if(!b)return;S.fcat=b.dataset.cat;renderCats();$('fErr').hidden=true;});
+$('paySeg').addEventListener('click',e=>{const b=e.target.closest('[data-pay]');if(!b)return;S.fpay=b.dataset.pay;renderPay();$('fErr').hidden=true;});
+$('fCards').addEventListener('click',e=>{const b=e.target.closest('[data-card]');if(!b)return;S.fcard=b.dataset.card;renderPay();$('fErr').hidden=true;});
 $('fAmt').addEventListener('input',()=>{const n=getAmt();setAmt(Math.min(n,999999999999));});
 $('quick').addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(!b)return;const a=+b.dataset.add;setAmt(a?getAmt()+a:0);});
 $('sheet').addEventListener('submit',e=>{
@@ -513,10 +582,14 @@ $('sheet').addEventListener('submit',e=>{
   const amt=getAmt(),date=$('fDate').value,err=$('fErr');
   if(!amt){err.textContent='금액을 입력해 주세요';err.hidden=false;$('fAmt').focus();return;}
   if(!S.fcat){err.textContent='어디에 썼는지 카테고리를 골라 주세요';err.hidden=false;return;}
+  const isOut=S.ftype==='out';
+  if(isOut&&!S.fpay){err.textContent='현금인지 카드인지 골라 주세요';err.hidden=false;return;}
+  if(isOut&&S.fpay==='card'&&!S.fcard){err.textContent='어느 카드로 냈는지 골라 주세요';err.hidden=false;return;}
   if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){err.textContent='날짜를 골라 주세요';err.hidden=false;return;}
   const rec={type:S.ftype,amt,cat:S.fcat,date,memo:$('fMemo').value.trim()};
+  if(isOut){rec.pay=S.fpay;if(S.fpay==='card')rec.card=S.fcard;db.last={pay:S.fpay,card:S.fpay==='card'?S.fcard:(db.last&&db.last.card)||null};}
   let msg='저장했어요';
-  if(S.edit){const t=db.tx.find(x=>x.id===S.edit);Object.assign(t,rec);delete t.sample;msg='고쳤어요';}
+  if(S.edit){const t=db.tx.find(x=>x.id===S.edit);delete t.pay;delete t.card;Object.assign(t,rec);delete t.sample;msg='고쳤어요';}
   else{
     if(hasSample()){db.tx=db.tx.filter(t=>!t.sample);msg='예시를 지우고 첫 기록을 저장했어요';}
     db.tx.push({id:uid(),...rec});
@@ -536,6 +609,18 @@ $('chips').addEventListener('click',e=>{
   if(db.cats[S.ctype].length<=1){toast('카테고리는 하나 이상 있어야 해요');return;}
   armed(b,'✕','삭제',()=>{db.cats[S.ctype]=db.cats[S.ctype].filter(c=>c.id!==b.dataset.delcat);save();renderSet();toast('카테고리를 지웠어요. 지난 기록은 그대로 남아요');});
 });
+$('cardChips').addEventListener('click',e=>{
+  const b=e.target.closest('[data-delcard]');if(!b)return;
+  armed(b,'✕','삭제',()=>{db.cards=db.cards.filter(c=>c.id!==b.dataset.delcard);save();renderSet();toast('카드를 지웠어요. 지난 기록은 그대로 남아요');});
+});
+$('addCard').addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=$('newCard').value.trim();
+  if(!name){toast('카드 이름을 입력해 주세요');$('newCard').focus();return;}
+  if(db.cards.some(c=>c.name===name)){toast('같은 이름의 카드가 이미 있어요');return;}
+  db.cards.push({id:'k'+uid(),name});save();renderSet();
+  $('newCard').value='';toast(`'${name}'을(를) 추가했어요`);
+});
 $('addCat').addEventListener('submit',e=>{
   e.preventDefault();
   const name=$('newName').value.trim(),icon=$('newIcon').value.trim()||'🏷️';
@@ -553,15 +638,19 @@ function copyOut(text,label){
 $('expJson').onclick=()=>{const d={...db,tx:db.tx.filter(t=>!t.sample)};copyOut(JSON.stringify(d),'백업 코드');};
 $('expCsv').onclick=()=>{
   const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
-  const lines=['날짜,구분,카테고리,금액,메모'];
-  db.tx.filter(t=>!t.sample).forEach(t=>lines.push([t.date,t.type==='in'?'수입':'지출',q(cat(t.type,t.cat).name),t.amt,q(t.memo||'')].join(',')));
+  const lines=['날짜,구분,카테고리,금액,결제수단,카드,메모'];
+  db.tx.filter(t=>!t.sample).forEach(t=>{
+    const pay=t.type!=='out'||!t.pay?'':t.pay==='cash'?'현금':'카드';
+    const card=t.type==='out'&&t.pay==='card'&&t.card?cardName(t.card):'';
+    lines.push([t.date,t.type==='in'?'수입':'지출',q(cat(t.type,t.cat).name),t.amt,pay,q(card),q(t.memo||'')].join(','));
+  });
   copyOut(lines.join('\n'),'CSV');
 };
 $('impFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('impIn').value=r.result;toast('파일을 불러왔어요. 복원하기를 누르세요');};r.readAsText(f);e.target.value='';});
 $('impBtn').onclick=e=>{
   let d;try{d=JSON.parse($('impIn').value.trim());}catch(err){toast('백업 코드 형식이 올바르지 않아요');return;}
   if(!d||!Array.isArray(d.tx)||!d.cats||!Array.isArray(d.cats.out)||!Array.isArray(d.cats.in)){toast('가계부 백업 코드가 아니에요');return;}
-  armed(e.currentTarget,'복원하기','한 번 더 누르면 덮어써요',()=>{db={v:1,cats:d.cats,tx:d.tx.filter(t=>t&&t.id&&t.date&&t.amt>0)};save();$('impIn').value='';render();toast(`기록 ${db.tx.length}건을 복원했어요`);});
+  armed(e.currentTarget,'복원하기','한 번 더 누르면 덮어써요',()=>{db=upgrade({cats:d.cats,cards:d.cards,last:d.last,tx:d.tx.filter(t=>t&&t.id&&t.date&&t.amt>0)});save();$('impIn').value='';render();toast(`기록 ${db.tx.length}건을 복원했어요`);});
 };
 $('resetBtn').onclick=e=>armed(e.currentTarget,'전체 초기화','한 번 더 누르면 모두 지워져요',()=>{db=fresh(false);save();S.ctype='out';render();toast('처음 상태로 되돌렸어요');});
 
