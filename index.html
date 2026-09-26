@@ -92,7 +92,7 @@ button{cursor:pointer}
 .ico{grid-area:ico;flex:none;width:2.5rem;height:2.5rem;border-radius:.8rem;background:var(--sunk);display:grid;place-items:center;font-size:1.25rem}
 .row .t{grid-area:t;min-width:0}
 .row .t b{display:block;font-weight:600}
-.row .t span{display:block;font-size:.9rem;color:var(--muted)}
+.row .t > span{display:block;font-size:.9rem;color:var(--muted)}
 .row .amt{grid-area:amt;font-weight:600;font-size:1rem;text-align:right}
 /* 글자가 커서 한 줄에 안 들어가면 금액을 이름 아래로 내린다 */
 @container (max-width: 19em){
@@ -189,6 +189,18 @@ textarea.field{min-height:7rem;resize:vertical;font-family:var(--mono);font-size
 .cats button[aria-pressed="true"]{border-color:var(--accent);background:var(--surface);font-weight:700}
 .q-lbl{font-size:.95rem;font-weight:700;margin-bottom:.45rem}
 .pay-box{display:grid;gap:.5rem}
+/* 카드사 로고 배지: 카드사 대표 색 + 이름 */
+.cb{display:inline-grid;place-items:center;background:var(--cb);color:var(--cbt);font-family:var(--sans);font-weight:700;letter-spacing:-.03em;line-height:1;white-space:nowrap;border-radius:.4em;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.cb-card{min-width:3.1rem;height:2rem;padding:0 .4rem;font-size:.8rem;border-radius:.45rem}
+.cb-sm{font-size:.72rem;padding:.2em .4em;margin-right:.3em;vertical-align:.08em}
+.ico.cb{font-size:.72rem;padding:0 .15rem}
+/* 카드사 로고 이미지: 다크 모드에서도 잘 보이게 흰 판 위에 올린다 */
+.cl{display:inline-flex;align-items:center;justify-content:center;flex:none;background:#fff;border-radius:.4em;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1);overflow:hidden}
+.cl img{display:block;width:100%;height:100%;min-width:0;min-height:0;object-fit:contain}
+.cl.cb-card{width:100%;max-width:6.5rem;height:2.2rem;padding:.3rem .45rem;border-radius:.45rem}
+.cl.cb-sm{width:3.6em;height:1.45em;padding:.15em .3em;margin-right:.35em;vertical-align:-.35em}
+.cl.ico{width:3.6rem;padding:.35rem .4rem;border-radius:.7rem}
+.credit{margin-top:.8rem;font-size:.8rem;color:var(--muted)}
 .no-card{font-size:.9rem;color:var(--muted);background:var(--sunk);border-radius:.8rem;padding:.7rem .8rem}
 .addcard{display:flex;flex-wrap:wrap;gap:.5rem}
 .addcard .field{flex:1 1 10rem}
@@ -263,6 +275,7 @@ try{var s=localStorage.getItem('hanson-gagyebu-scale');if(s)document.documentEle
           <input class="field" id="newCard" maxlength="12" placeholder="예: 카카오뱅크카드" aria-label="카드 이름">
           <button class="btn primary" type="submit">카드 추가</button>
         </form>
+        <p class="credit">카드사 로고는 각 회사의 상표예요. 이미지 출처: 위키미디어 공용·한국어 위키백과 (신한카드 로고 CC BY-SA 3.0)</p>
       </div>
 
       <div class="card">
@@ -419,9 +432,31 @@ const S={view:'stats',y:now.getFullYear(),m:now.getMonth(),ctype:'out',edit:null
 const mkey=(y,m)=>y+'-'+pad(m+1);
 function cat(type,id){return db.cats[type].find(c=>c.id===id)||{id,name:'삭제된 카테고리',icon:'📦'};}
 function cardName(id){const c=db.cards.find(x=>x.id===id);return c?c.name:'삭제된 카드';}
-function payText(t){
+/* 카드 이름에 들어 있는 카드사로 배지 모양을 정한다. 직접 추가한 카드도 이름으로 알아본다 */
+const BRANDS=[
+  [/신한/,'신한','#0046ff','#fff','shinhan.gif'],[/삼성/,'삼성','#1428a0','#fff','samsung.png'],[/현대/,'현대','#111111','#fff','hyundai.svg'],
+  [/국민|KB/i,'KB','#ffbc00','#3d3a33','kb.svg'],[/롯데/,'롯데','#e60012','#fff','lotte.jpg'],[/하나/,'하나','#00928f','#fff','hana.svg'],
+  [/우리/,'우리','#0067ac','#fff','woori.png'],[/BC|비씨/i,'BC','#e5323b','#fff','bc.svg'],[/농협|NH/i,'NH','#0b9e4b','#fff','nh.png'],
+  [/카카오/,'kakao','#fee500','#191919'],[/토스/,'toss','#0064ff','#fff'],[/씨티/,'씨티','#056dae','#fff'],
+  [/기업|IBK/i,'IBK','#0b4ea2','#fff'],[/케이뱅크/,'K','#1e1e64','#fff'],[/수협/,'수협','#0086cf','#fff']
+];
+function brandOf(name){
+  const b=BRANDS.find(x=>x[0].test(name));
+  if(b)return {label:b[1],bg:b[2],fg:b[3],logo:b[4]};
+  let h=0;for(const ch of name)h=(h*31+ch.codePointAt(0))>>>0;
+  return {label:name.replace(/카드$/,'').slice(0,2)||'카드',bg:PALETTE[h%PALETTE.length],fg:'#fff'};
+}
+/* 로고 이미지가 있는 카드사는 로고를, 없으면 색 배지를 보여 준다 */
+function cardBadge(name,cls){
+  const b=brandOf(name);
+  if(b.logo)return `<span class="cl ${cls}" aria-hidden="true"><img src="logos/${b.logo}" alt="" loading="lazy"></span>`;
+  return `<span class="cb ${cls}" style="--cb:${b.bg};--cbt:${b.fg}" aria-hidden="true">${esc(b.label)}</span>`;
+}
+function payHtml(t){
   if(t.type!=='out'||!t.pay)return '';
-  return t.pay==='cash'?'💵 현금':'💳 '+(t.card?cardName(t.card):'카드');
+  if(t.pay==='cash')return '💵 현금';
+  const n=t.card?cardName(t.card):'카드';
+  return cardBadge(n,'cb-sm')+esc(n);
 }
 function catColor(id){const i=db.cats.out.findIndex(c=>c.id===id);return PALETTE[(i<0?7:i)%PALETTE.length];}
 function monthTx(y,m){const k=mkey(y,m);return db.tx.filter(t=>t.date.slice(0,7)===k);}
@@ -466,8 +501,8 @@ function renderHome(){
     let net=0;items.forEach(t=>net+=t.type==='in'?t.amt:-t.amt);
     h+=`<div class="day"><div class="day-h"><span>${mm}월 ${dd}일 (${WD[new Date(yy,mm-1,dd).getDay()]})</span><span class="num">${net<0?'−':'+'}${won(Math.abs(net))}원</span></div><div class="rows">`;
     items.slice().reverse().forEach(t=>{
-      const c=cat(t.type,t.cat),sub=[payText(t),t.memo].filter(Boolean).join(' · ');
-      h+=`<button class="row" data-edit="${t.id}"><span class="ico">${esc(c.icon)}</span><span class="t"><b>${esc(c.name)}</b>${sub?`<span>${esc(sub)}</span>`:''}</span><span class="amt num ${t.type==='in'?'c-in':'c-out'}">${t.type==='in'?'+':'−'}${won(t.amt)}원</span></button>`;
+      const c=cat(t.type,t.cat),sub=[payHtml(t),t.memo?esc(t.memo):''].filter(Boolean).join(' · ');
+      h+=`<button class="row" data-edit="${t.id}"><span class="ico">${esc(c.icon)}</span><span class="t"><b>${esc(c.name)}</b>${sub?`<span>${sub}</span>`:''}</span><span class="amt num ${t.type==='in'?'c-in':'c-out'}">${t.type==='in'?'+':'−'}${won(t.amt)}원</span></button>`;
     });
     h+=`</div></div>`;
   });
@@ -508,8 +543,11 @@ function renderStats(){
   const prow=Object.entries(pays).sort((x,y)=>y[1]-x[1]);
   h+=`<div class="card"><h2>어떻게 냈을까요</h2><div class="rank">`;
   prow.forEach(([k,v])=>{
-    const [ico,name,color]=k==='cash'?['💵','현금','#4ea56c']:k==='none'?['❔','결제 수단 안 적음','#8d989c']:['💳',k.slice(5)?cardName(k.slice(5)):'카드','#3b8ed3'];
-    h+=`<div class="rk nod"><span class="ico">${ico}</span><span class="n">${esc(name)}<small>${Math.round(v/total*100)}%</small></span><span class="v num">${won(v)}원</span>
+    let ico,name,color;
+    if(k==='cash'){ico='<span class="ico">💵</span>';name='현금';color='#4ea56c';}
+    else if(k==='none'){ico='<span class="ico">❔</span>';name='결제 수단 안 적음';color='#8d989c';}
+    else{name=k.slice(5)?cardName(k.slice(5)):'카드';const b=brandOf(name);color=b.bg;ico=cardBadge(name,'ico');}
+    h+=`<div class="rk nod">${ico}<span class="n">${esc(name)}<small>${Math.round(v/total*100)}%</small></span><span class="v num">${won(v)}원</span>
       <div class="bar"><i style="width:${Math.max(2,v/prow[0][1]*100)}%;background:${color}"></i></div></div>`;
   });
   h+=`</div></div>`;
@@ -520,7 +558,7 @@ function renderSet(){
   renderSizes();
   document.querySelectorAll('#catSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ctype===S.ctype));
   $('chips').innerHTML=db.cats[S.ctype].map(c=>`<span class="chip">${esc(c.icon)} ${esc(c.name)}<button type="button" data-delcat="${esc(c.id)}" aria-label="${esc(c.name)} 삭제">✕</button></span>`).join('');
-  $('cardChips').innerHTML=db.cards.length?db.cards.map(c=>`<span class="chip">💳 ${esc(c.name)}<button type="button" data-delcard="${esc(c.id)}" aria-label="${esc(c.name)} 삭제">✕</button></span>`).join(''):'<span class="no-card">등록된 카드가 없어요. 아래에서 추가하세요.</span>';
+  $('cardChips').innerHTML=db.cards.length?db.cards.map(c=>`<span class="chip">${cardBadge(c.name,'cb-sm')}${esc(c.name)}<button type="button" data-delcard="${esc(c.id)}" aria-label="${esc(c.name)} 삭제">✕</button></span>`).join(''):'<span class="no-card">등록된 카드가 없어요. 아래에서 추가하세요.</span>';
 }
 
 /* sheet */
@@ -535,7 +573,7 @@ function renderPay(){
   document.querySelectorAll('#paySeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.pay===S.fpay));
   const box=$('fCards');box.hidden=S.fpay!=='card';
   box.innerHTML=db.cards.length
-    ?db.cards.map(c=>`<button type="button" data-card="${esc(c.id)}" aria-pressed="${c.id===S.fcard}"><span>💳</span><em>${esc(c.name)}</em></button>`).join('')
+    ?db.cards.map(c=>`<button type="button" data-card="${esc(c.id)}" aria-pressed="${c.id===S.fcard}">${cardBadge(c.name,'cb-card')}<em>${esc(c.name)}</em></button>`).join('')
     :'<div class="no-card" style="grid-column:1/-1">등록된 카드가 없어요. 설정 → 내 카드에서 추가하세요.</div>';
 }
 function setAmt(n){$('fAmt').value=n?won(n):'';}
