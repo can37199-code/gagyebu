@@ -21,9 +21,11 @@ img{max-width:100%}
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
 <style>
+/* 글자 크기: --scale 하나로 전체(글자·버튼·여백)가 함께 커진다. 모든 크기는 rem/em 기준 */
 :root{
-  --bg:#f2f5f3; --surface:#ffffff; --sunk:#e9eeeb; --ink:#17201c; --muted:#65716b; --line:#dfe6e2;
-  --accent:#1b7a59; --accent-ink:#ffffff; --out:#d2453a; --in:#2461c7; --danger:#c8372c;
+  --scale:1.2;
+  --bg:#f2f5f3; --surface:#ffffff; --sunk:#e9eeeb; --ink:#17201c; --muted:#56625c; --line:#d6dfda;
+  --accent:#1b7a59; --accent-ink:#ffffff; --out:#c8392e; --in:#1f59bd; --danger:#c0352a;
   --shadow:0 6px 24px rgba(20,40,30,.14);
   --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
@@ -31,152 +33,183 @@ img{max-width:100%}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme:dark;
-    --bg:#0f1412; --surface:#18201c; --sunk:#131a17; --ink:#e7eeea; --muted:#90a098; --line:#26312c;
-    --accent:#3db486; --accent-ink:#06140e; --out:#f0766b; --in:#76a3f2; --danger:#f0766b;
+    --bg:#0f1412; --surface:#18201c; --sunk:#131a17; --ink:#eef3f0; --muted:#a3b1aa; --line:#2c3833;
+    --accent:#3db486; --accent-ink:#06140e; --out:#f47f74; --in:#86aef5; --danger:#f47f74;
     --shadow:0 6px 24px rgba(0,0,0,.5);
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#0f1412; --surface:#18201c; --sunk:#131a17; --ink:#e7eeea; --muted:#90a098; --line:#26312c;
-  --accent:#3db486; --accent-ink:#06140e; --out:#f0766b; --in:#76a3f2; --danger:#f0766b;
+  --bg:#0f1412; --surface:#18201c; --sunk:#131a17; --ink:#eef3f0; --muted:#a3b1aa; --line:#2c3833;
+  --accent:#3db486; --accent-ink:#06140e; --out:#f47f74; --in:#86aef5; --danger:#f47f74;
   --shadow:0 6px 24px rgba(0,0,0,.5);
 }
+html{font-size:calc(15px * var(--scale));-webkit-text-size-adjust:100%;text-size-adjust:100%}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{height:100%}
-body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:1rem;line-height:1.5;-webkit-tap-highlight-color:transparent;overflow-wrap:anywhere;word-break:keep-all}
 button,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+:focus-visible{outline:.15rem solid var(--accent);outline-offset:.15rem}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em;white-space:nowrap}
 
-.wrap{max-width:480px;margin:0 auto;padding-inline:16px;padding-block:0 150px}
+.wrap{max-width:34rem;margin:0 auto;padding-inline:16px;padding-block:0 calc(4.5rem + 90px)}
 
-/* header */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:8px;padding-block:14px 10px}
-.brand{font-weight:700;font-size:17px;letter-spacing:-.01em}
-.month{display:flex;align-items:center;gap:2px}
-.month b{font-weight:600;font-size:16px;min-width:92px;text-align:center}
-.icon-btn{width:40px;height:40px;border:0;background:transparent;border-radius:12px;font-size:20px;display:grid;place-items:center}
+/* header: 1줄 = 제목 + 글자크기, 2줄 = 월 이동 */
+.top{padding-block:.7rem .5rem;display:grid;gap:.3rem}
+.top-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.brand{font-weight:700;font-size:1.15rem;letter-spacing:-.01em}
+.size-btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:.3rem .8rem;font-size:.9rem;font-weight:600;min-height:2.6rem;display:inline-flex;align-items:center;gap:.3rem}
+.size-btn b{font-size:1.15em}
+.month{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-radius:1rem;padding:.2rem}
+.month b{font-weight:700;font-size:1.1rem;text-align:center;flex:1}
+.icon-btn{flex:none;width:2.9rem;height:2.9rem;border:0;background:transparent;border-radius:.8rem;font-size:1.5rem;line-height:1;display:grid;place-items:center}
 .icon-btn:active{background:var(--sunk)}
 
 /* sample banner */
-.banner{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--sunk);border:1px dashed var(--line);border-radius:14px;padding:10px 12px;font-size:13px;color:var(--muted);margin-bottom:12px}
-.banner button{flex:none;border:0;background:var(--ink);color:var(--bg);border-radius:10px;padding:7px 11px;font-size:13px;font-weight:600}
+.banner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.6rem;background:var(--sunk);border:1px dashed var(--line);border-radius:.9rem;padding:.7rem .8rem;font-size:.9rem;color:var(--muted);margin-bottom:.8rem}
+.banner span{flex:1 1 12rem}
+.banner button{flex:none;border:0;background:var(--ink);color:var(--bg);border-radius:.7rem;padding:.5rem .8rem;font-size:.9rem;font-weight:600;min-height:2.6rem}
 
 /* summary */
-.summary{background:var(--surface);border-radius:20px;padding:18px;display:grid;gap:14px;box-shadow:0 1px 0 var(--line)}
-.bal-label{font-size:13px;color:var(--muted)}
-.bal{font-size:30px;font-weight:600;line-height:1.15}
-.split{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.split div{background:var(--sunk);border-radius:12px;padding:10px 12px}
-.split small{display:block;font-size:12px;color:var(--muted)}
-.split .num{font-size:16px;font-weight:600}
+.summary{background:var(--surface);border-radius:1.2rem;padding:1.1rem;display:grid;gap:.9rem}
+.bal-label{font-size:.9rem;color:var(--muted)}
+.bal{font-size:1.9rem;font-weight:600;line-height:1.2;white-space:normal;overflow-wrap:anywhere}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.6rem}
+.split div{background:var(--sunk);border-radius:.8rem;padding:.6rem .8rem;min-width:0}
+.split small{display:block;font-size:.85rem;color:var(--muted)}
+.split .num{font-size:1.05rem;font-weight:600;white-space:normal;overflow-wrap:anywhere}
 .c-out{color:var(--out)} .c-in{color:var(--in)}
 
 /* list */
-.day{margin-top:20px}
-.day-h{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);padding:0 4px 6px}
-.rows{background:var(--surface);border-radius:16px;overflow:hidden}
-.row{width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border:0;background:transparent;text-align:left}
+.day{margin-top:1.3rem}
+.day-h{display:flex;flex-wrap:wrap;justify-content:space-between;gap:0 .6rem;font-size:.9rem;color:var(--muted);padding:0 .3rem .4rem}
+.rows{background:var(--surface);border-radius:1rem;overflow:hidden;container-type:inline-size}
+.row{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"ico t amt";align-items:center;gap:.2rem .8rem;padding:.8rem .9rem;border:0;background:transparent;text-align:left;min-height:3.6rem}
 .row+.row{border-top:1px solid var(--line)}
 .row:active{background:var(--sunk)}
-.ico{flex:none;width:38px;height:38px;border-radius:12px;background:var(--sunk);display:grid;place-items:center;font-size:19px}
-.row .t{flex:1;min-width:0}
-.row .t b{display:block;font-weight:500}
-.row .t span{display:block;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .amt{font-weight:600;font-size:15px}
-.empty{text-align:center;color:var(--muted);padding:48px 12px;font-size:14px}
+.ico{grid-area:ico;flex:none;width:2.5rem;height:2.5rem;border-radius:.8rem;background:var(--sunk);display:grid;place-items:center;font-size:1.25rem}
+.row .t{grid-area:t;min-width:0}
+.row .t b{display:block;font-weight:600}
+.row .t span{display:block;font-size:.9rem;color:var(--muted)}
+.row .amt{grid-area:amt;font-weight:600;font-size:1rem;text-align:right}
+/* 글자가 커서 한 줄에 안 들어가면 금액을 이름 아래로 내린다 */
+@container (max-width: 19em){
+  .row{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"ico t" "ico amt";align-items:start}
+  .row .amt{text-align:left;font-size:1.05rem}
+}
+.empty{text-align:center;color:var(--muted);padding:3rem .8rem;font-size:1rem}
 
 /* stats */
-.card{background:var(--surface);border-radius:20px;padding:18px}
-.card+.card{margin-top:12px}
-.card h2{margin:0 0 4px;font-size:13px;font-weight:500;color:var(--muted)}
-.donut-box{display:grid;place-items:center;padding:8px 0 4px}
-.donut{width:200px;max-width:100%;height:auto}
+.card{background:var(--surface);border-radius:1.2rem;padding:1.1rem}
+.card+.card{margin-top:.8rem}
+.card h2{margin:0 0 .3rem;font-size:.95rem;font-weight:600;color:var(--muted)}
+.donut-box{display:grid;place-items:center;padding:.5rem 0 .3rem}
+.donut{width:13.5rem;max-width:100%;height:auto}
 .donut text{fill:var(--ink)}
-.cmp{font-size:14px;margin-top:6px}
-.cmp b{font-weight:600}
-.rank{display:grid;gap:14px;margin-top:6px}
-.rk{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center}
-.rk .ico{width:34px;height:34px;font-size:17px;grid-row:span 2}
-.rk .n{font-weight:500;display:flex;gap:6px;align-items:baseline}
-.rk .n small{color:var(--muted);font-size:12px;font-weight:400}
-.rk .v{text-align:right;font-weight:600}
-.bar{grid-column:2 / 4;height:6px;border-radius:3px;background:var(--sunk);overflow:hidden}
-.bar i{display:block;height:100%;border-radius:3px}
-.delta{font-size:12px;color:var(--muted);text-align:right;grid-column:3}
+.cmp{font-size:1rem;margin-top:.4rem}
+.cmp b{font-weight:700}
+.rank{display:grid;gap:1rem;margin-top:.4rem;container-type:inline-size}
+.rk{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"ico n v" "ico bar bar" ". d d";gap:.3rem .7rem;align-items:center}
+.rk .ico{width:2.3rem;height:2.3rem;font-size:1.1rem;grid-area:ico}
+.rk .n{grid-area:n;font-weight:600;display:flex;flex-wrap:wrap;gap:0 .4rem;align-items:baseline;min-width:0}
+.rk .n small{color:var(--muted);font-size:.85rem;font-weight:500}
+.rk .v{grid-area:v;text-align:right;font-weight:600}
+.bar{grid-area:bar;height:.45rem;border-radius:.25rem;background:var(--sunk);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:.25rem}
+.delta{grid-area:d;font-size:.85rem;color:var(--muted);white-space:normal}
+@container (max-width: 19em){
+  .rk{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"ico n" "ico v" "bar bar" "d d"}
+  .rk .v{text-align:left}
+}
 
 /* settings */
-.set h2{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--ink)}
-.set p{margin:0 0 12px;font-size:13px;color:var(--muted)}
-.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--sunk);border-radius:12px;padding:3px;gap:3px}
-.seg button{border:0;background:transparent;border-radius:9px;padding:9px;font-weight:600;color:var(--muted)}
+.set h2{margin:0 0 .6rem;font-size:1.05rem;font-weight:700;color:var(--ink)}
+.set p{margin:0 0 .8rem;font-size:.9rem;color:var(--muted)}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--sunk);border-radius:.8rem;padding:.2rem;gap:.2rem}
+.seg button{border:0;background:transparent;border-radius:.6rem;padding:.6rem;font-weight:600;color:var(--muted);min-height:2.8rem}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .seg button[aria-pressed="true"].out{color:var(--out)}
 .seg button[aria-pressed="true"].in{color:var(--in)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-.chip{display:flex;align-items:center;gap:6px;background:var(--sunk);border-radius:999px;padding:6px 6px 6px 12px;font-size:14px}
-.chip button{border:0;background:transparent;width:26px;height:26px;border-radius:50%;color:var(--muted);font-size:14px}
-.chip button.arm{background:var(--danger);color:#fff;width:auto;border-radius:999px;padding:0 10px;font-size:12px}
-.addcat{display:grid;grid-template-columns:58px 1fr auto;gap:8px}
-.field{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 12px;min-height:44px}
+.sizes{display:grid;grid-template-columns:repeat(auto-fit,minmax(5.4rem,1fr));gap:.5rem}
+.sizes button{border:2px solid var(--line);background:var(--bg);border-radius:.9rem;padding:.6rem .4rem;display:grid;justify-items:center;align-content:center;gap:.1rem;font-size:.9rem;font-weight:600;min-height:5.2rem}
+.sizes button span{line-height:1.1;font-weight:700}
+.sizes button[aria-pressed="true"]{border-color:var(--accent);background:var(--surface);color:var(--accent)}
+.preview{margin-top:.8rem;background:var(--sunk);border-radius:.8rem;padding:.7rem .9rem;font-size:1rem}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:.8rem 0}
+.chip{display:flex;align-items:center;gap:.4rem;background:var(--sunk);border-radius:999px;padding:.3rem .3rem .3rem .8rem;font-size:.95rem;max-width:100%}
+.chip button{border:0;background:transparent;min-width:2.2rem;height:2.2rem;border-radius:999px;color:var(--muted);font-size:.95rem}
+.chip button.arm{background:var(--danger);color:#fff;padding:0 .7rem;font-size:.85rem}
+.addcat{display:grid;grid-template-columns:3.6rem minmax(0,1fr);gap:.5rem}
+.addcat .btn{grid-column:1 / -1}
+.field{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:.8rem;padding:.6rem .8rem;min-height:2.9rem;min-width:0}
 .field:focus{outline:none;border-color:var(--accent)}
-.btn{border:0;border-radius:12px;padding:11px 16px;font-weight:600;background:var(--sunk);min-height:44px}
+.btn{border:0;border-radius:.8rem;padding:.65rem 1rem;font-weight:600;background:var(--sunk);min-height:2.9rem}
 .btn.primary{background:var(--accent);color:var(--accent-ink)}
 .btn.danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
 .btn.danger.arm{background:var(--danger);color:#fff}
-.btns{display:flex;flex-wrap:wrap;gap:8px}
-textarea.field{min-height:110px;resize:vertical;font-family:var(--mono);font-size:12px;margin-top:10px}
+.btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.btns > *{flex:1 1 9rem;justify-content:center}
+textarea.field{min-height:7rem;resize:vertical;font-family:var(--mono);font-size:.8rem;margin-top:.6rem}
 .filebtn{position:relative;overflow:hidden;display:inline-flex;align-items:center}
 .filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
 
 /* FAB + tabs */
-.fab{position:fixed;right:max(16px,calc(50% - 224px));bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:6;width:58px;height:58px;border-radius:20px;border:0;background:var(--accent);color:var(--accent-ink);font-size:30px;line-height:1;box-shadow:var(--shadow)}
-.fab:active{transform:scale(.95)}
+.fab{position:fixed;right:max(16px,calc(50% - 17rem + 16px));bottom:calc(5.4rem + env(safe-area-inset-bottom,0px));z-index:6;min-width:min(3.8rem,68px);height:min(3.8rem,68px);padding:0 min(1rem,18px);border-radius:min(1.3rem,22px);border:0;background:var(--accent);color:var(--accent-ink);font-size:min(1.1rem,20px);font-weight:700;box-shadow:var(--shadow);display:flex;align-items:center;gap:.3rem}
+.fab span{font-size:1.6em;line-height:1}
+.fab:active{transform:scale(.96)}
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
-.tabs div{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
-.tabs button{border:0;background:transparent;padding:9px 0 10px;display:grid;justify-items:center;gap:1px;font-size:12px;color:var(--muted)}
-.tabs button span{font-size:20px;filter:grayscale(1);opacity:.6}
-.tabs button[aria-current="page"]{color:var(--ink);font-weight:600}
+.tabs div{max-width:34rem;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+.tabs button{border:0;background:transparent;padding:.5rem 0 .55rem;display:grid;justify-items:center;gap:0;font-size:.85rem;color:var(--muted);min-height:3.6rem}
+.tabs button span{font-size:1.35rem;line-height:1.2;filter:grayscale(1);opacity:.55}
+.tabs button[aria-current="page"]{color:var(--ink);font-weight:700}
 .tabs button[aria-current="page"] span{filter:none;opacity:1}
 
 /* sheet */
 .sheet-wrap{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center}
 .scrim{position:absolute;inset:0;background:rgba(8,14,11,.45);animation:fade .18s ease}
-.sheet{position:relative;width:100%;max-width:480px;max-height:92%;overflow-y:auto;background:var(--surface);border-radius:22px 22px 0 0;padding:10px 16px calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:14px;animation:up .22s cubic-bezier(.2,.8,.3,1)}
-.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto}
-.sheet-h{display:flex;justify-content:space-between;align-items:center}
-.sheet-h b{font-size:17px}
-.amt-box{display:flex;align-items:baseline;gap:6px;border-bottom:2px solid var(--line);padding-bottom:6px}
+.sheet{position:relative;width:100%;max-width:34rem;max-height:94%;overflow-y:auto;overscroll-behavior:contain;background:var(--surface);border-radius:1.4rem 1.4rem 0 0;padding:.6rem 16px calc(1rem + env(safe-area-inset-bottom,0px));display:grid;gap:.9rem;animation:up .22s cubic-bezier(.2,.8,.3,1)}
+.grab{width:2.6rem;height:.25rem;border-radius:.15rem;background:var(--line);margin:0 auto}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.sheet-h b{font-size:1.15rem}
+.close-btn{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:.3rem .9rem;min-height:2.6rem;font-weight:600;font-size:.95rem}
+.amt-box{display:flex;align-items:baseline;gap:.4rem;border-bottom:2px solid var(--line);padding-bottom:.3rem}
 .amt-box:focus-within{border-color:var(--accent)}
-.amt-box input{flex:1;min-width:0;border:0;background:transparent;font-family:var(--mono);font-size:32px;font-weight:600;padding:0;outline:none}
-.amt-box span{font-size:18px;color:var(--muted)}
-.quick{display:flex;gap:6px;flex-wrap:wrap}
-.quick button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;font-size:13px;font-family:var(--mono)}
-.cats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.cats button{border:1.5px solid transparent;background:var(--sunk);border-radius:14px;padding:9px 2px 7px;display:grid;justify-items:center;gap:2px;font-size:12px;min-width:0}
-.cats button span{font-size:22px;line-height:1.2}
-.cats button em{font-style:normal;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px}
-.cats button[aria-pressed="true"]{border-color:var(--accent);background:var(--surface);font-weight:600}
-.two{display:grid;grid-template-columns:1fr 1.4fr;gap:8px}
-.lbl{font-size:12px;color:var(--muted);margin-bottom:4px;display:block}
-.err{color:var(--danger);font-size:13px;min-height:0}
-.actions{display:grid;grid-template-columns:auto 1fr;gap:8px}
-.actions .primary{grid-column:2}
+.amt-box input{flex:1;min-width:0;width:100%;border:0;background:transparent;font-family:var(--mono);font-size:2rem;font-weight:600;padding:0;outline:none}
+.amt-box span{font-size:1.2rem;color:var(--muted)}
+.quick{display:flex;gap:.4rem;flex-wrap:wrap}
+.quick button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:.35rem .8rem;font-size:.9rem;min-height:2.5rem}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(5rem,1fr));gap:.5rem}
+.cats button{border:2px solid transparent;background:var(--sunk);border-radius:.9rem;padding:.55rem .15rem .45rem;display:grid;justify-items:center;gap:.1rem;font-size:.85rem;min-width:0}
+.cats button span{font-size:1.45rem;line-height:1.2}
+.cats button em{font-style:normal;max-width:100%;padding:0 .15rem;text-align:center;line-height:1.25}
+.cats button[aria-pressed="true"]{border-color:var(--accent);background:var(--surface);font-weight:700}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.5rem}
+.lbl{font-size:.85rem;color:var(--muted);margin-bottom:.25rem;display:block}
+.err{color:var(--danger);font-size:.95rem;font-weight:600}
+.actions{display:flex;flex-wrap:wrap;gap:.5rem}
+.actions .primary{flex:2 1 10rem;font-size:1.05rem;min-height:3.2rem}
+.actions .danger{flex:1 1 6rem}
 
-.toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:30;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
+.toast{position:fixed;left:50%;bottom:calc(10rem + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:30;background:var(--ink);color:var(--bg);padding:.7rem 1rem;border-radius:.8rem;font-size:.95rem;width:max-content;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 @keyframes up{from{transform:translateY(100%)}to{transform:none}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.sheet,.scrim{animation:none}}
 </style>
 </head>
 <body>
+<script>
+/* 저장된 글자 크기를 화면 그리기 전에 적용 */
+try{var s=localStorage.getItem('hanson-gagyebu-scale');if(s)document.documentElement.style.setProperty('--scale',s);}catch(e){}
+</script>
 
 <div class="wrap">
   <header class="top">
-    <span class="brand" id="topTitle">한손 가계부</span>
+    <div class="top-row">
+      <span class="brand" id="topTitle">한손 가계부</span>
+      <button class="size-btn" id="sizeBtn" aria-label="글자 크기 바꾸기"><b>가</b>글자 크기</button>
+    </div>
     <div class="month" id="monthNav">
       <button class="icon-btn" id="prevM" aria-label="이전 달">‹</button>
       <b id="monthLabel"></b>
@@ -193,6 +226,13 @@ textarea.field{min-height:110px;resize:vertical;font-family:var(--mono);font-siz
     <section id="v-home" hidden></section>
     <section id="v-stats"></section>
     <section id="v-set" class="set" hidden>
+      <div class="card" id="sizeCard">
+        <h2>글자 크기</h2>
+        <p>잘 보이는 크기를 누르세요. 바로 바뀌어요.</p>
+        <div class="sizes" id="sizes"></div>
+        <div class="preview">예) 점심 김치찌개 <b class="num c-out">−9,500원</b></div>
+      </div>
+
       <div class="card">
         <h2>카테고리</h2>
         <div class="seg" id="catSeg">
@@ -203,13 +243,13 @@ textarea.field{min-height:110px;resize:vertical;font-family:var(--mono);font-siz
         <form class="addcat" id="addCat">
           <input class="field" id="newIcon" maxlength="4" placeholder="🙂" aria-label="아이콘(이모지)" style="text-align:center">
           <input class="field" id="newName" maxlength="10" placeholder="새 카테고리 이름" aria-label="카테고리 이름">
-          <button class="btn primary" type="submit">추가</button>
+          <button class="btn primary" type="submit">카테고리 추가</button>
         </form>
       </div>
 
       <div class="card">
         <h2>백업</h2>
-        <p>기록은 이 폰의 브라우저에만 저장돼요. 백업 코드를 복사해서 메모앱이나 나에게 보내기 채팅에 붙여 두세요.</p>
+        <p>기록은 이 폰에만 저장돼요. 백업 코드를 복사해서 메모앱이나 카톡 '나와의 채팅'에 붙여 두세요.</p>
         <div class="btns">
           <button class="btn" id="expJson">백업 코드 복사</button>
           <button class="btn" id="expCsv">엑셀용 CSV 복사</button>
@@ -221,7 +261,7 @@ textarea.field{min-height:110px;resize:vertical;font-family:var(--mono);font-siz
         <h2>복원</h2>
         <p>백업 코드를 붙여 넣거나 백업 파일을 고르세요. 지금 기록은 백업 내용으로 바뀌어요.</p>
         <textarea class="field" id="impIn" placeholder="여기에 백업 코드 붙여넣기" aria-label="백업 코드"></textarea>
-        <div class="btns" style="margin-top:10px">
+        <div class="btns" style="margin-top:.6rem">
           <span class="btn filebtn">파일에서 불러오기<input type="file" id="impFile" accept=".json,.txt,application/json,text/plain"></span>
           <button class="btn primary" id="impBtn">복원하기</button>
         </div>
@@ -236,7 +276,7 @@ textarea.field{min-height:110px;resize:vertical;font-family:var(--mono);font-siz
   </main>
 </div>
 
-<button class="fab" id="fab" aria-label="기록 추가">＋</button>
+<button class="fab" id="fab" aria-label="기록 추가"><span>＋</span>기록</button>
 
 <nav class="tabs" aria-label="메뉴">
   <div>
@@ -252,17 +292,15 @@ textarea.field{min-height:110px;resize:vertical;font-family:var(--mono);font-siz
     <div class="grab"></div>
     <div class="sheet-h">
       <b id="sheetTitle">기록 추가</b>
-      <button type="button" class="icon-btn" id="closeSheet" aria-label="닫기">✕</button>
+      <button type="button" class="close-btn" id="closeSheet">✕ 닫기</button>
     </div>
     <div class="seg" id="typeSeg">
       <button type="button" class="out" data-type="out" aria-pressed="true">지출</button>
       <button type="button" class="in" data-type="in" aria-pressed="false">수입</button>
     </div>
-    <div>
-      <div class="amt-box">
-        <input id="fAmt" inputmode="numeric" autocomplete="off" placeholder="0" aria-label="금액">
-        <span>원</span>
-      </div>
+    <div class="amt-box">
+      <input id="fAmt" inputmode="numeric" autocomplete="off" placeholder="0" aria-label="금액">
+      <span>원</span>
     </div>
     <div class="quick" id="quick">
       <button type="button" data-add="1000">+1천</button>
@@ -274,7 +312,7 @@ textarea.field{min-height:110px;resize:vertical;font-family:var(--mono);font-siz
     <div class="cats" id="fCats" role="group" aria-label="카테고리"></div>
     <div class="two">
       <label><span class="lbl">날짜</span><input type="date" class="field" id="fDate"></label>
-      <label><span class="lbl">메모 (선택)</span><input class="field" id="fMemo" maxlength="40" placeholder="예: 점심 김밥"></label>
+      <label><span class="lbl">메모 (안 써도 돼요)</span><input class="field" id="fMemo" maxlength="40" placeholder="예: 점심 김밥"></label>
     </div>
     <div class="err" id="fErr" hidden></div>
     <div class="actions">
@@ -284,11 +322,13 @@ textarea.field{min-height:110px;resize:vertical;font-family:var(--mono);font-siz
   </form>
 </div>
 
-<div class="toast" id="toast" hidden></div>
+<div class="toast" id="toast" role="status" hidden></div>
 
 <script>
 (function(){
-const KEY='hanson-gagyebu-v1';
+const KEY='hanson-gagyebu-v1', SCALE_KEY='hanson-gagyebu-scale';
+const SCALES=[{v:1,name:'보통'},{v:1.2,name:'크게'},{v:1.4,name:'아주 크게'},{v:1.6,name:'가장 크게'}];
+const DEFAULT_SCALE=1.2;
 const PALETTE=['#e0674d','#e2a236','#4ea56c','#3b8ed3','#8b6fd3','#d25f9c','#3aaea6','#8d989c','#b98a4f','#6f7fd8'];
 const DEF_CATS={
   out:[['food','식비','🍚'],['cafe','카페','☕'],['trans','교통','🚌'],['shop','쇼핑','🛒'],['home','주거/통신','🏠'],['med','의료','💊'],['fun','여가','🎉'],['etc','기타','📦']],
@@ -326,6 +366,18 @@ function save(){
 }
 const hasSample=()=>db.tx.some(t=>t.sample);
 
+/* 글자 크기 */
+let scale=DEFAULT_SCALE;
+try{const s=parseFloat(localStorage.getItem(SCALE_KEY));if(SCALES.some(x=>x.v===s))scale=s;}catch(e){}
+function applyScale(v,persist){
+  scale=v;document.documentElement.style.setProperty('--scale',String(v));
+  if(persist){try{localStorage.setItem(SCALE_KEY,String(v));}catch(e){}}
+  renderSizes();
+}
+function renderSizes(){
+  $('sizes').innerHTML=SCALES.map(x=>`<button type="button" data-scale="${x.v}" aria-pressed="${x.v===scale}"><span style="font-size:${(x.v/scale*1.35).toFixed(3)}em">가</span>${x.name}</button>`).join('');
+}
+
 /* state */
 const now=new Date();
 const S={view:'stats',y:now.getFullYear(),m:now.getMonth(),ctype:'out',edit:null,ftype:'out',fcat:null};
@@ -335,19 +387,20 @@ function catColor(id){const i=db.cats.out.findIndex(c=>c.id===id);return PALETTE
 function monthTx(y,m){const k=mkey(y,m);return db.tx.filter(t=>t.date.slice(0,7)===k);}
 
 /* toast */
-let tt;function toast(msg){const el=$('toast');el.textContent=msg;el.hidden=false;clearTimeout(tt);tt=setTimeout(()=>el.hidden=true,2400);}
+let tt;function toast(msg){const el=$('toast');el.textContent=msg;el.hidden=false;clearTimeout(tt);tt=setTimeout(()=>el.hidden=true,2800);}
 
-/* two-tap confirm */
+/* 두 번 눌러 확인 */
 function armed(btn,label,armLabel,fn){
   if(btn.dataset.armed){delete btn.dataset.armed;btn.classList.remove('arm');btn.textContent=label;fn();return;}
   btn.dataset.armed='1';btn.classList.add('arm');btn.textContent=armLabel;
-  setTimeout(()=>{if(btn.dataset.armed){delete btn.dataset.armed;btn.classList.remove('arm');btn.textContent=label;}},3500);
+  setTimeout(()=>{if(btn.dataset.armed){delete btn.dataset.armed;btn.classList.remove('arm');btn.textContent=label;}},4000);
 }
 
 /* render */
 function render(){
   $('monthLabel').textContent=S.y+'년 '+(S.m+1)+'월';
   $('monthNav').hidden=S.view==='set';
+  $('sizeBtn').hidden=S.view==='set';
   $('topTitle').textContent=S.view==='set'?'설정':'한손 가계부';
   $('banner').hidden=!hasSample()||S.view==='set';
   $('fab').hidden=S.view==='set';
@@ -366,15 +419,15 @@ function renderHome(){
     <div><div class="bal-label">이번 달 남은 돈</div><div class="bal num ${bal<0?'c-out':''}">${bal<0?'−':''}${won(Math.abs(bal))}원</div></div>
     <div class="split"><div><small>수입</small><span class="num c-in">${won(inc)}원</span></div><div><small>지출</small><span class="num c-out">${won(exp)}원</span></div></div>
   </div>`;
-  if(!list.length){h+=`<div class="empty">이 달에는 기록이 없어요.<br>＋ 버튼을 눌러 첫 기록을 남겨 보세요.</div>`;$('v-home').innerHTML=h;return;}
+  if(!list.length){h+=`<div class="empty">이 달에는 기록이 없어요.<br>아래 <b>＋기록</b> 버튼을 눌러 적어 보세요.</div>`;$('v-home').innerHTML=h;return;}
   const byDay={};list.forEach(t=>(byDay[t.date]=byDay[t.date]||[]).push(t));
   Object.keys(byDay).sort().reverse().forEach(d=>{
     const items=byDay[d];const [yy,mm,dd]=d.split('-').map(Number);
     let net=0;items.forEach(t=>net+=t.type==='in'?t.amt:-t.amt);
-    h+=`<div class="day"><div class="day-h"><span>${mm}월 ${dd}일 (${WD[new Date(yy,mm-1,dd).getDay()]})</span><span class="num">${net<0?'−':'+'}${won(Math.abs(net))}</span></div><div class="rows">`;
+    h+=`<div class="day"><div class="day-h"><span>${mm}월 ${dd}일 (${WD[new Date(yy,mm-1,dd).getDay()]})</span><span class="num">${net<0?'−':'+'}${won(Math.abs(net))}원</span></div><div class="rows">`;
     items.slice().reverse().forEach(t=>{
       const c=cat(t.type,t.cat);
-      h+=`<button class="row" data-edit="${t.id}"><span class="ico">${esc(c.icon)}</span><span class="t"><b>${esc(c.name)}</b>${t.memo?`<span>${esc(t.memo)}</span>`:''}</span><span class="amt num ${t.type==='in'?'c-in':'c-out'}">${t.type==='in'?'+':'−'}${won(t.amt)}</span></button>`;
+      h+=`<button class="row" data-edit="${t.id}"><span class="ico">${esc(c.icon)}</span><span class="t"><b>${esc(c.name)}</b>${t.memo?`<span>${esc(t.memo)}</span>`:''}</span><span class="amt num ${t.type==='in'?'c-in':'c-out'}">${t.type==='in'?'+':'−'}${won(t.amt)}원</span></button>`;
     });
     h+=`</div></div>`;
   });
@@ -386,7 +439,7 @@ function renderStats(){
   const cur=monthTx(S.y,S.m),pd=new Date(S.y,S.m-1,1),prev=monthTx(pd.getFullYear(),pd.getMonth());
   const a=sumByCat(cur),b=sumByCat(prev);
   const total=Object.values(a).reduce((s,v)=>s+v,0),ptotal=Object.values(b).reduce((s,v)=>s+v,0);
-  if(!total){$('v-stats').innerHTML=`<div class="card"><h2>이번 달 지출</h2><div class="empty">이 달에는 지출 기록이 없어요.</div></div>`;return;}
+  if(!total){$('v-stats').innerHTML=`<div class="card"><h2>이번 달 지출</h2><div class="empty">이 달에는 지출 기록이 없어요.<br>아래 <b>＋기록</b> 버튼을 눌러 적어 보세요.</div></div>`;return;}
   const rows=Object.entries(a).sort((x,y)=>y[1]-x[1]);
   const R=48,C=2*Math.PI*R,gap=rows.length>1?1.2:0;let off=0,segs='';
   rows.forEach(([id,v])=>{const len=Math.max(0,v/total*C-gap);segs+=`<circle cx="60" cy="60" r="${R}" fill="none" stroke="${catColor(id)}" stroke-width="16" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}"/>`;off+=v/total*C;});
@@ -396,23 +449,24 @@ function renderStats(){
     <div class="donut-box"><svg class="donut" viewBox="0 0 120 120" role="img" aria-label="카테고리별 지출 비율">
       <circle cx="60" cy="60" r="${R}" fill="none" stroke="var(--sunk)" stroke-width="16"/>
       <g transform="rotate(-90 60 60)">${segs}</g>
-      <text x="60" y="56" text-anchor="middle" font-size="7.5" style="fill:var(--muted)">총 지출</text>
-      <text x="60" y="70" text-anchor="middle" font-size="12" font-weight="600" class="num">${won(total)}원</text>
+      <text x="60" y="55" text-anchor="middle" font-size="8" style="fill:var(--muted)">총 지출</text>
+      <text x="60" y="70" text-anchor="middle" font-size="${total>=10000000?9.5:12}" font-weight="600" class="num">${won(total)}원</text>
     </svg></div>
     <div class="cmp">${cmp}</div></div>
-    <div class="card"><h2>카테고리 순위</h2><div class="rank">`;
+    <div class="card"><h2>어디에 많이 썼을까요</h2><div class="rank">`;
   rows.forEach(([id,v])=>{
     const c=cat('out',id),pct=Math.round(v/total*100),pv=b[id]||0,d=v-pv;
-    const dl=pv?(d===0?'지난달과 같음':`지난달 대비 ${d>0?'+':'−'}${won(Math.abs(d))}`):'지난달 기록 없음';
+    const dl=pv?(d===0?'지난달과 같아요':`지난달보다 ${won(Math.abs(d))}원 ${d>0?'더':'덜'}`):'지난달 기록 없음';
     h+=`<div class="rk"><span class="ico">${esc(c.icon)}</span><span class="n">${esc(c.name)}<small>${pct}%</small></span><span class="v num">${won(v)}원</span>
       <div class="bar"><i style="width:${Math.max(2,v/rows[0][1]*100)}%;background:${catColor(id)}"></i></div>
-      <span class="delta num" style="grid-column:2 / 4">${dl}</span></div>`;
+      <span class="delta">${dl}</span></div>`;
   });
   h+=`</div></div>`;
   $('v-stats').innerHTML=h;
 }
 
 function renderSet(){
+  renderSizes();
   document.querySelectorAll('#catSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ctype===S.ctype));
   $('chips').innerHTML=db.cats[S.ctype].map(c=>`<span class="chip">${esc(c.icon)} ${esc(c.name)}<button type="button" data-delcat="${esc(c.id)}" aria-label="${esc(c.name)} 삭제">✕</button></span>`).join('');
 }
@@ -426,10 +480,11 @@ function setAmt(n){$('fAmt').value=n?won(n):'';}
 function getAmt(){return Number($('fAmt').value.replace(/[^\d]/g,''))||0;}
 function openSheet(tx){
   S.edit=tx?tx.id:null;S.ftype=tx?tx.type:'out';S.fcat=tx?tx.cat:null;
-  $('sheetTitle').textContent=tx?'기록 수정':'기록 추가';
+  $('sheetTitle').textContent=tx?'기록 고치기':'기록 추가';
   setAmt(tx?tx.amt:0);$('fDate').value=tx?tx.date:iso(new Date());$('fMemo').value=tx?tx.memo||'':'';
   $('delBtn').hidden=!tx;$('delBtn').textContent='삭제';$('delBtn').classList.remove('arm');delete $('delBtn').dataset.armed;
   $('fErr').hidden=true;renderCats();$('sheetWrap').style.display='';$('sheetWrap').hidden=false;
+  $('sheet').scrollTop=0;
   if(!tx)$('fAmt').focus();
 }
 function closeSheet(){
@@ -441,6 +496,7 @@ function closeSheet(){
 document.querySelector('.tabs').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;S.view=b.dataset.view;render();window.scrollTo(0,0);});
 $('prevM').onclick=()=>{const d=new Date(S.y,S.m-1,1);S.y=d.getFullYear();S.m=d.getMonth();render();};
 $('nextM').onclick=()=>{const d=new Date(S.y,S.m+1,1);S.y=d.getFullYear();S.m=d.getMonth();render();};
+$('sizeBtn').onclick=()=>{S.view='set';render();window.scrollTo(0,0);};
 $('fab').onclick=()=>openSheet(null);
 $('v-home').addEventListener('click',e=>{const b=e.target.closest('[data-edit]');if(!b)return;const t=db.tx.find(x=>x.id===b.dataset.edit);if(t)openSheet(t);});
 $('clearSample').onclick=()=>{db.tx=db.tx.filter(t=>!t.sample);save();render();toast('예시 기록을 지웠어요');};
@@ -456,11 +512,11 @@ $('sheet').addEventListener('submit',e=>{
   e.preventDefault();
   const amt=getAmt(),date=$('fDate').value,err=$('fErr');
   if(!amt){err.textContent='금액을 입력해 주세요';err.hidden=false;$('fAmt').focus();return;}
-  if(!S.fcat){err.textContent='카테고리를 골라 주세요';err.hidden=false;return;}
+  if(!S.fcat){err.textContent='어디에 썼는지 카테고리를 골라 주세요';err.hidden=false;return;}
   if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){err.textContent='날짜를 골라 주세요';err.hidden=false;return;}
   const rec={type:S.ftype,amt,cat:S.fcat,date,memo:$('fMemo').value.trim()};
   let msg='저장했어요';
-  if(S.edit){const t=db.tx.find(x=>x.id===S.edit);Object.assign(t,rec);delete t.sample;msg='수정했어요';}
+  if(S.edit){const t=db.tx.find(x=>x.id===S.edit);Object.assign(t,rec);delete t.sample;msg='고쳤어요';}
   else{
     if(hasSample()){db.tx=db.tx.filter(t=>!t.sample);msg='예시를 지우고 첫 기록을 저장했어요';}
     db.tx.push({id:uid(),...rec});
@@ -473,6 +529,7 @@ $('sheet').addEventListener('submit',e=>{
 $('delBtn').onclick=e=>armed(e.currentTarget,'삭제','한 번 더 누르면 삭제',()=>{db.tx=db.tx.filter(t=>t.id!==S.edit);save();closeSheet();render();toast('삭제했어요');});
 
 /* settings */
+$('sizes').addEventListener('click',e=>{const b=e.target.closest('[data-scale]');if(!b)return;const v=+b.dataset.scale;applyScale(v,true);toast(`글자 크기를 '${SCALES.find(x=>x.v===v).name}'(으)로 바꿨어요`);});
 $('catSeg').addEventListener('click',e=>{const b=e.target.closest('[data-ctype]');if(!b)return;S.ctype=b.dataset.ctype;renderSet();});
 $('chips').addEventListener('click',e=>{
   const b=e.target.closest('[data-delcat]');if(!b)return;
@@ -508,6 +565,7 @@ $('impBtn').onclick=e=>{
 };
 $('resetBtn').onclick=e=>armed(e.currentTarget,'전체 초기화','한 번 더 누르면 모두 지워져요',()=>{db=fresh(false);save();S.ctype='out';render();toast('처음 상태로 되돌렸어요');});
 
+applyScale(scale,false);
 load();render();
 })();
 </script>
