@@ -1,5 +1,5 @@
 // 오프라인 캐시: 네트워크 우선, 실패하면 캐시
-const CACHE = 'gagyebu-v5';
+const CACHE = 'gagyebu-v6';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
   './logos/shinhan.gif', './logos/samsung.png', './logos/hyundai.svg', './logos/kb.svg', './logos/lotte.jpg',
   './logos/hana.svg', './logos/woori.png', './logos/bc.svg', './logos/nh.png'];
