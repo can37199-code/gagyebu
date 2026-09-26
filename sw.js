@@ -1,5 +1,5 @@
 // 오프라인 캐시: 네트워크 우선, 실패하면 캐시
-const CACHE = 'gagyebu-v2';
+const CACHE = 'gagyebu-v3';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
